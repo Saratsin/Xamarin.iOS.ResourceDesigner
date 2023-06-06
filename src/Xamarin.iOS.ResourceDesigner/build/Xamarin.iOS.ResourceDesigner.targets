@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+	
+	<PropertyGroup>
+		<TaskPath Condition="$(TaskPath) == '' Or $(TaskPath) == '*Undefined*'">$([System.IO.Directory]::GetParent($(MSBuildThisFileDirectory)).Parent.FullName)\tasks</TaskPath>
+        <_ResourceDesignerFile>$(IntermediateOutputPath)Resource.designer.cs</_ResourceDesignerFile>
+	</PropertyGroup>
+
+    <UsingTask TaskName="Xamarin.iOS.ResourceDesigner.GenerateResourceDesignerTask" AssemblyFile="$(TaskPath)\netstandard2.0\Xamarin.iOS.ResourceDesigner.dll" />
+    <Target Name="GenerateResourceDesigner" BeforeTargets="CoreCompile">
+      <PropertyGroup>
+      </PropertyGroup>
+ 	    <GenerateResourceDesignerTask ResourceDesignerFilePath="$(_ResourceDesignerFile)" ProjectNamespace="$(RootNamespace)" ImageAssets="@(ImageAsset)" />
+ 	    <ItemGroup>
+			  <FileWrites Include="$(_ResourceDesignerFile)" />
+			  <Compile Include="$(_ResourceDesignerFile)" />
+		  </ItemGroup>
+    </Target>
+</Project>
