@@ -76,7 +76,7 @@
     <ItemGroup>
       <PackageReference Include="Xamarin.Essentials" Version="1.7.3" />
       <PackageReference Include="Xamarin.iOS.ResourceDesigner">
-        <Version>0.4.6</Version>
+        <Version>0.5.2</Version>
       </PackageReference>
     </ItemGroup>
     <ItemGroup>
@@ -129,10 +129,22 @@
         <ImageAsset Include="Assets.xcassets\ic_list.imageset\Contents.json" />
         <ImageAsset Include="Media.xcassets\Contents.json" />
         <ImageAsset Include="Media.xcassets\Assets\Contents.json" />
-        <ImageAsset Include="Media.xcassets\Assets\ic-list.imageset\ic_list.pdf" />
-        <ImageAsset Include="Media.xcassets\Assets\ic-list.imageset\Contents.json" />
         <ImageAsset Include="Media.xcassets\Assets\ic_info_personal.imageset\ic_info.pdf" />
         <ImageAsset Include="Media.xcassets\Assets\ic_info_personal.imageset\Contents.json" />
+        <ImageAsset Include="Media.xcassets\Assets\1ic_information+2.3.imageset\ic_info.pdf" />
+        <ImageAsset Include="Media.xcassets\Assets\1ic_information+2.3.imageset\Contents.json" />
+        <ImageAsset Include="Media.xcassets\Assets\ic+info.imageset\ic_info.pdf" />
+        <ImageAsset Include="Media.xcassets\Assets\ic+info.imageset\Contents.json" />
+        <ImageAsset Include="Media.xcassets\Assets\ic.info2.imageset\ic_info.pdf" />
+        <ImageAsset Include="Media.xcassets\Assets\ic.info2.imageset\Contents.json" />
+        <ImageAsset Include="Media.xcassets\Assets\ic_info.imageset\ic_info.pdf" />
+        <ImageAsset Include="Media.xcassets\Assets\ic_info.imageset\Contents.json" />
+        <ImageAsset Include="Media.xcassets\Assets\ic-info.imageset\ic_info.pdf" />
+        <ImageAsset Include="Media.xcassets\Assets\ic-info.imageset\Contents.json" />
+        <ImageAsset Include="Media.xcassets\Assets\ic-list 1.imageset\ic_list.pdf" />
+        <ImageAsset Include="Media.xcassets\Assets\ic-list 1.imageset\Contents.json" />
+        <ImageAsset Include="Media.xcassets\Assets\ic_image.imageset\ic_list.pdf" />
+        <ImageAsset Include="Media.xcassets\Assets\ic_image.imageset\Contents.json" />
     </ItemGroup>
     <ItemGroup>
         <InterfaceDefinition Include="LaunchScreen.storyboard" />

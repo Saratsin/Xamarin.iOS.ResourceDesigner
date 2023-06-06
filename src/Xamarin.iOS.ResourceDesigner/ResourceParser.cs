@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using Microsoft.Build.Utilities;
 using Stubble.Core;
 
@@ -32,6 +33,7 @@ namespace Xamarin.iOS.ResourceDesigner
             var assets = imageAssets
                 .Where(path => Path.GetFileName(path) == "Contents.json")
                 .Select(path => Directory.GetParent(path).FullName)
+                .Where(path => !string.IsNullOrEmpty(Path.GetExtension(path)))
                 .Where(path => Path.GetExtension(path).TrimStart('.') != "xcassets")
                 .GroupBy(assetPath => Path.GetExtension(assetPath).TrimStart('.'), assetPath => assetPath)
                 .Where(group => group.Any() && group.Key == "imageset");
@@ -83,7 +85,22 @@ namespace Xamarin.iOS.ResourceDesigner
                             ambigiousPropertyNames[propertyName].Add(assetPath);
 
                             var suffix = ambigiousPropertyNames[propertyName].Count - 1;
-                            propertyName = $"{propertyName}{suffix}";
+                            propertyName = $"{propertyName}_{suffix}";
+                        }
+
+                        if (propertyName == className)
+                        {
+                            propertyName = $"{propertyName}Resource";
+                            Log.LogWarning(
+                                subcategory: null,
+                                warningCode: null,
+                                helpKeyword: null,
+                                file: ResourceDesignerFilePath,
+                                lineNumber: 0,
+                                columnNumber: 0,
+                                endLineNumber: 0,
+                                endColumnNumber: 0,
+                                message: $"Asset {assetName} produces the same property name as its enclosing class.\nAdding suffix in order to avoid compilation error.\nPropery name will be {propertyName}");
                         }
 
                         var lazyFieldName = GetLazyFieldName(propertyName);
@@ -187,38 +204,32 @@ namespace Xamarin.iOS.ResourceDesigner
             };
         }
 
-        private string GetPropertyName(string assetName)
-        {
-            var formattedName = ToPascalCase(assetName);
-            foreach (var start in TrimmingStarts)
-            {
-                formattedName = TrimStart(formattedName, start, StringComparison.InvariantCultureIgnoreCase);
-            }
-
-            return formattedName;
-        }
 
         private string GetLazyFieldName(string propertyName)
         {
             return "_" + char.ToLowerInvariant(propertyName[0]) + propertyName.Substring(1) + "Lazy";
         }
 
-        private string ToPascalCase(string name)
+        private string GetPropertyName(string assetName)
         {
-            return name
-                .Split(new[] { "_", "-" }, StringSplitOptions.RemoveEmptyEntries)
+            var propertyNameParts = assetName
+                .Split(new[] { "_", "-", "+", "." }, StringSplitOptions.RemoveEmptyEntries)
+                .Select(s => Regex.Replace(s, "[^a-zA-Z0-9]", string.Empty))
                 .Select(s => char.ToUpperInvariant(s[0]) + s.Substring(1))
-                .Aggregate(string.Empty, (s1, s2) => s1 + s2);
-        }
+                .ToList();
 
-        private string TrimStart(string text, string trimmingText, StringComparison comparison = StringComparison.InvariantCulture)
-        {
-            if (text.StartsWith(trimmingText, comparison))
+            if (TrimmingStarts.Any(trimmingStart => trimmingStart.Equals(propertyNameParts.First(), StringComparison.InvariantCultureIgnoreCase)))
             {
-                return text.Substring(trimmingText.Length);
+                propertyNameParts.RemoveAt(0);
             }
 
-            return text;
+            var propertyName = string.Join(string.Empty, propertyNameParts);
+            if (char.IsDigit(propertyName[0]))
+            {
+                propertyName = $"R{propertyName}";
+            }
+
+            return propertyName;
         }
     }
 }
