@@ -6,6 +6,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using Microsoft.Build.Utilities;
 using Stubble.Core;
+using Xamarin.iOS.ResourceDesigner.Dto;
 
 namespace Xamarin.iOS.ResourceDesigner
 {
