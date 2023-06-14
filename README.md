@@ -36,7 +36,7 @@ Pull requests are also most welcome.
 
 ## Version History
 
-* 0.8.0
+* 0.7.0
     * Initial release, support for ImageAsset items that has Contents.json files
 
 ## License
