@@ -18,11 +18,11 @@ jobs:
       with:
         nuget-api-key: ${{secrets.NUGET_API_KEY}}
     - name: Restore
-      run: nuget restore src/Xamarin.iOS.RsourceDesigner.sln
+      run: nuget restore src/Xamarin.iOS.ResourceDesigner.sln
     - name: Build
-      run: msbuild src/Xamarin.iOS.RsourceDesigner/Xamarin.iOS.RsourceDesigner.csproj /property:Configuration=Release /warnaserror
+      run: msbuild src/Xamarin.iOS.ResourceDesigner/Xamarin.iOS.ResourceDesigner.csproj /property:Configuration=Release /warnaserror
     - name: Publish
       uses: dansiegel/publish-nuget@v1.2
       with:
-        filename: 'src/JavaGl.Obj/bin/Release/Xamarin.iOS.RsourceDesigner.*.nupkg'
+        filename: 'src/JavaGl.Obj/bin/Release/Xamarin.iOS.ResourceDesigner.*.nupkg'
         apiKey: ${{ secrets.NUGET_API_KEY }}
