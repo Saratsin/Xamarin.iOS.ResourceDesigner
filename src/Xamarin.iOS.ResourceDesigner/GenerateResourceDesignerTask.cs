@@ -1,8 +1,5 @@
-using System.CodeDom;
-using System.CodeDom.Compiler;
 using System.IO;
 using System.Linq;
-using System.Text;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 
@@ -19,17 +16,32 @@ namespace Xamarin.iOS.ResourceDesigner
         [Required]
         public string? ProjectNamespace { get; set; }
 
+        [Required]
+        public string? ImageAssetsTrimmingPrefixes { get; set; }
+
+        [Required]
+        public string? ImageAssetFilenamesSeparatorChars { get; set; }
+
         public override bool Execute()
         {
-            Log.LogMessage(MessageImportance.Normal, "Started Resource.designer.cs creation :D");
+            var resourceDesignerFilename = Path.GetFileName(ResourceDesignerFilePath);
+            Log.LogMessage($"Started {resourceDesignerFilename} creation :D");
 
-            var parser = new ResourceParser(Log, ResourceDesignerFilePath!);
-            var assets = ImageAssets!.Select(asset => Path.GetFullPath(asset.ItemSpec));
-            var resourceDesignerFileString = parser.Parse(ProjectNamespace!, assets);
+            var imageAssetFilePaths = ImageAssets!.Select(asset => asset.GetMetadata("FullPath")).ToArray();
+            var imageAssetsTrimmingPrefixes = ImageAssetsTrimmingPrefixes!.Split('|');
+            var imageAssetFilenamesSeparatorChars = ImageAssetFilenamesSeparatorChars!.ToCharArray();
+
+            var parser = new ResourceParser(Log);
+            var resourceDesignerFileString = parser.Parse(
+                ProjectNamespace!,
+                imageAssetFilePaths,
+                imageAssetsTrimmingPrefixes,
+                imageAssetFilenamesSeparatorChars,
+                ResourceDesignerFilePath!);
 
             File.WriteAllText(ResourceDesignerFilePath!, resourceDesignerFileString);
 
-            Log.LogMessage(MessageImportance.Normal, "Finished Resource.designer.cs creation");
+            Log.LogMessage($"Finished {resourceDesignerFilename} creation");
 
             return !Log.HasLoggedErrors;
         }

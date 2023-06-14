@@ -9,13 +9,15 @@
          packaged, and we'll implement it below. This property controls the
          dependency list for this packaging process, so by adding our custom
          property we hook ourselves into the process in a supported way. -->
-	<TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);CopyProjectReferencesToPackage</TargetsForTfmSpecificBuildOutput>
-	<!-- This property tells MSBuild where the root folder of the package's
+    <TargetsForTfmSpecificBuildOutput>
+      $(TargetsForTfmSpecificBuildOutput);CopyProjectReferencesToPackage
+    </TargetsForTfmSpecificBuildOutput>
+    <!-- This property tells MSBuild where the root folder of the package's
          build assets should be. Because we are not a library package, we should
          not pack to 'lib'. Instead, we choose 'tasks' by convention. -->
-	<BuildOutputTargetFolder>tasks</BuildOutputTargetFolder>
+    <BuildOutputTargetFolder>tasks</BuildOutputTargetFolder>
     <!-- Tell the SDK to generate a deps.json file -->
-	<GenerateDependencyFile>true</GenerateDependencyFile>
+    <GenerateDependencyFile>true</GenerateDependencyFile>
     <!-- Forces SDK to copy dependencies into build output in order to make
          packing easier -->
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
@@ -23,13 +25,14 @@
 
   <PropertyGroup Label="Nuget">
     <PackageId>Xamarin.iOS.ResourceDesigner</PackageId>
-    <PackageVersion>0.5.2</PackageVersion>
+    <PackageVersion>0.7.0-beta-5</PackageVersion>
     <Authors>Taras Shevchuk</Authors>
     <Owners>Taras Shevchuk</Owners>
-    <!-- <PackageIcon>icon.png</PackageIcon> -->
-    <Summary>Xamarin.iOS Resource designer generation, inspired by R.swift</Summary>
+    <PackageIcon>icon.png</PackageIcon>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <Summary>Xamarin.iOS Resource designer generator, inspired by R.swift</Summary>
     <Title>Xamarin.iOS.ResourceDesigner</Title>
-    <Description>Xamarin.iOS Resource designer generation, inspired by R.swift</Description>
+    <Description>Xamarin.iOS Resource designer generator, inspired by R.swift</Description>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/Saratsin/Xamarin.iOS.ResourceDesigner</PackageProjectUrl>
     <PackageTags>Xamarin, iOS, Resources</PackageTags>
@@ -40,13 +43,14 @@
          dependencies, but we _explicitly_ do not want that behavior for
          MSBuild tasks. They are isolated by design. Therefore we ignore this
          specific warning. -->
-	<NoWarn>NU5100</NoWarn>
+    <NoWarn>NU5100</NoWarn>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
-    <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
+    <AllowedOutputExtensionsInPackageBuildOutputFolder>
+      $(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
 
     <DesignTimeBuild>false</DesignTimeBuild>
@@ -57,12 +61,22 @@
   </PropertyGroup>
 
   <ItemGroup>
- 	  <!-- these lines pack the build props/targets files to the `build` folder
+    <!-- these lines pack the build props/targets files to the `build` folder
            in the generated package. By convention, the .NET SDK will look for
            build\<Package Id>.props and build\<Package Id> targets for automatic
            inclusion in the build. -->
     <Content Include="build\Xamarin.iOS.ResourceDesigner.targets" PackagePath="build\" />
   </ItemGroup>
+
+  
+  <ItemGroup>
+    <None Remove="Resources\Resource.designer.mustache" />
+    <EmbeddedResource Include="Resources\Resource.designer.mustache" />
+
+    <None Include="..\..\icon.png" Pack="true" PackagePath="\" />
+    <None Include="..\..\README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
+
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Build.Framework" Version="17.6.3" PrivateAssets="all" />
@@ -87,25 +101,19 @@
        PackageReference and ProjectReference's runtime assets to our package
        output.  -->
   <Target Name="CopyProjectReferencesToPackage" DependsOnTargets="ResolveReferences">
-	  <ItemGroup>
-		  <!-- The TargetPath is the path inside the package that the source
+    <ItemGroup>
+      <!-- The TargetPath is the path inside the package that the source
                file will be placed. This is already precomputed in the
                ReferenceCopyLocalPaths items' DestinationSubPath, so reuse it
                here. -->
-		  <BuildOutputInPackage Include="@(ReferenceCopyLocalPaths)" TargetPath="%(ReferenceCopyLocalPaths.DestinationSubPath)" />
-	  </ItemGroup>
+      <BuildOutputInPackage Include="@(ReferenceCopyLocalPaths)" TargetPath="%(ReferenceCopyLocalPaths.DestinationSubPath)" />
+    </ItemGroup>
   </Target>
 
   <!-- This target adds the generated deps.json file to our package output -->
   <Target Name="AddBuildDependencyFileToBuiltProjectOutputGroupOutput" BeforeTargets="BuiltProjectOutputGroup" Condition=" '$(GenerateDependencyFile)' == 'true'">
-  	<ItemGroup>
-  		<BuiltProjectOutputGroupOutput Include="$(ProjectDepsFilePath)" TargetPath="$(ProjectDepsFileName)" FinalOutputPath="$(ProjectDepsFilePath)" />
-  	</ItemGroup>
+    <ItemGroup>
+      <BuiltProjectOutputGroupOutput Include="$(ProjectDepsFilePath)" TargetPath="$(ProjectDepsFileName)" FinalOutputPath="$(ProjectDepsFilePath)" />
+    </ItemGroup>
   </Target>
-
-  <ItemGroup>
-    <None Remove="Resources\Resource.designer.mustache" />
-    <EmbeddedResource Include="Resources\Resource.designer.mustache" />
-  </ItemGroup>
-
 </Project>

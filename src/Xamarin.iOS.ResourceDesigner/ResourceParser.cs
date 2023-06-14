@@ -12,24 +12,32 @@ namespace Xamarin.iOS.ResourceDesigner
 {
     public class ResourceParser
     {
-        private static readonly string[] TrimmingStarts = { "ic", "img" };
+        private const string MustacheTemplateResourceName = "Xamarin.iOS.ResourceDesigner.Resources.Resource.designer.mustache";
+        
         private readonly TaskLoggingHelper Log;
-        private readonly string ResourceDesignerFilePath;
         private readonly string Template;
 
-        public ResourceParser(TaskLoggingHelper log, string resourceDesignerFilePath)
+        public ResourceParser(TaskLoggingHelper log)
         {
             Log = log;
-            ResourceDesignerFilePath = resourceDesignerFilePath;
 
-            using var templateStream = GetType().Assembly.GetManifestResourceStream("Xamarin.iOS.ResourceDesigner.Resources.Resource.designer.mustache");
-            using var templateStreamReader = new StreamReader(templateStream);
-
-            Template = templateStreamReader.ReadToEnd();
+            Template = CreateTemplate();
         }
 
+        private string CreateTemplate()
+        {
+            using var templateStream = GetType().Assembly.GetManifestResourceStream(MustacheTemplateResourceName);
+            using var templateStreamReader = new StreamReader(templateStream);
 
-        public string Parse(string projectNamespace, IEnumerable<string> imageAssets)
+            return templateStreamReader.ReadToEnd();
+        }
+
+        public string Parse(
+            string projectNamespace,
+            string[] imageAssets,
+            string[] imageAssetsTrimmingPrefixes,
+            char[] imageAssetFilenamesSeparatorChars,
+            string resourceDesignerFilePath)
         {
             var assets = imageAssets
                 .Where(path => Path.GetFileName(path) == "Contents.json")
@@ -72,7 +80,7 @@ namespace Xamarin.iOS.ResourceDesigner
                             continue;
                         }
 
-                        var propertyName = GetPropertyName(assetName);
+                        var propertyName = GetPropertyName(assetName, imageAssetFilenamesSeparatorChars, imageAssetsTrimmingPrefixes);
                         if (propertiesList.Any(property => property.PropertyName == propertyName))
                         {
                             if (!ambigiousPropertyNames.TryGetValue(propertyName, out var ambiguities))
@@ -96,7 +104,7 @@ namespace Xamarin.iOS.ResourceDesigner
                                 subcategory: null,
                                 warningCode: null,
                                 helpKeyword: null,
-                                file: ResourceDesignerFilePath,
+                                file: resourceDesignerFilePath,
                                 lineNumber: 0,
                                 columnNumber: 0,
                                 endLineNumber: 0,
@@ -141,7 +149,7 @@ namespace Xamarin.iOS.ResourceDesigner
                     subcategory: null,
                     warningCode: null,
                     helpKeyword: null,
-                    file: ResourceDesignerFilePath,
+                    file: resourceDesignerFilePath,
                     lineNumber: 0,
                     columnNumber: 0,
                     endLineNumber: 0,
@@ -167,7 +175,7 @@ namespace Xamarin.iOS.ResourceDesigner
                     subcategory: null,
                     warningCode: null,
                     helpKeyword: null,
-                    file: ResourceDesignerFilePath,
+                    file: resourceDesignerFilePath,
                     lineNumber: 0,
                     columnNumber: 0,
                     endLineNumber: 0,
@@ -211,15 +219,15 @@ namespace Xamarin.iOS.ResourceDesigner
             return "_" + char.ToLowerInvariant(propertyName[0]) + propertyName.Substring(1) + "Lazy";
         }
 
-        private string GetPropertyName(string assetName)
+        private string GetPropertyName(string assetName, char[] filenamesSeparatorChars, string[] trimmingPrefixes)
         {
             var propertyNameParts = assetName
-                .Split(new[] { "_", "-", "+", "." }, StringSplitOptions.RemoveEmptyEntries)
+                .Split(filenamesSeparatorChars, StringSplitOptions.RemoveEmptyEntries)
                 .Select(s => Regex.Replace(s, "[^a-zA-Z0-9]", string.Empty))
                 .Select(s => char.ToUpperInvariant(s[0]) + s.Substring(1))
                 .ToList();
 
-            if (TrimmingStarts.Any(trimmingStart => trimmingStart.Equals(propertyNameParts.First(), StringComparison.InvariantCultureIgnoreCase)))
+            if (trimmingPrefixes.Any(trimmingPrefix => trimmingPrefix.Equals(propertyNameParts.First(), StringComparison.InvariantCultureIgnoreCase)))
             {
                 propertyNameParts.RemoveAt(0);
             }

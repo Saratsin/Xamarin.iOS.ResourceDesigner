@@ -12,10 +12,11 @@
         <AssemblyName>Xamarin.iOS.ResourceDesigner.Sample</AssemblyName>
         <IPhoneResourcePrefix>Resources</IPhoneResourcePrefix>
         <MtouchEnableSGenConc>true</MtouchEnableSGenConc>
-        <iOSResgenFile>Resources/Resource.designer.cs</iOSResgenFile>
         <MtouchHttpClientHandler>NSUrlSessionHandler</MtouchHttpClientHandler>
         <RestoreProjectStyle>PackageReference</RestoreProjectStyle>
         <ProvisioningType>automatic</ProvisioningType>
+        <ResourceDesignerFilePath>obj\Resources.cs</ResourceDesignerFilePath>
+        <ResourceDesignerImageAssetsTrimmingPrefixes>ic</ResourceDesignerImageAssetsTrimmingPrefixes>
     </PropertyGroup>
     <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|iPhoneSimulator' ">
         <DebugSymbols>true</DebugSymbols>
@@ -74,9 +75,9 @@
         <Reference Include="System.Numerics.Vectors" />
     </ItemGroup>
     <ItemGroup>
-      <PackageReference Include="Xamarin.Essentials" Version="1.7.3" />
+      <PackageReference Include="Xamarin.Essentials" Version="1.7.5" />
       <PackageReference Include="Xamarin.iOS.ResourceDesigner">
-        <Version>0.5.2</Version>
+        <Version>0.7.0-beta-5</Version>
       </PackageReference>
     </ItemGroup>
     <ItemGroup>
@@ -145,6 +146,8 @@
         <ImageAsset Include="Media.xcassets\Assets\ic-list 1.imageset\Contents.json" />
         <ImageAsset Include="Media.xcassets\Assets\ic_image.imageset\ic_list.pdf" />
         <ImageAsset Include="Media.xcassets\Assets\ic_image.imageset\Contents.json" />
+        <ImageAsset Include="Assets.xcassets\img_list.imageset\ic_list.pdf" />
+        <ImageAsset Include="Assets.xcassets\img_list.imageset\Contents.json" />
     </ItemGroup>
     <ItemGroup>
         <InterfaceDefinition Include="LaunchScreen.storyboard" />
