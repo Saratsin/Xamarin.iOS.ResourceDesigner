@@ -1,5 +1,5 @@
 # Xamarin.iOS.ResourceDesigner
-[![Build](https://github.com/Saratsin/Xamarin.iOS.ResourceDesigner/actions/workflows/build.yml/badge.svg)](https://github.com/Saratsin/Xamarin.iOS.ResourceDesigner/actions/workflows/build_and_publish_nuget.yml) 
+[![Build](https://github.com/Saratsin/Xamarin.iOS.ResourceDesigner/actions/workflows/build.yml/badge.svg)](https://github.com/Saratsin/Xamarin.iOS.ResourceDesigner/actions/workflows/build.yml) 
 [![Nuget](https://img.shields.io/nuget/v/Xamarin.iOS.ResourceDesigner)](https://www.nuget.org/packages/Xamarin.iOS.ResourceDesigner)
 
 Xamarin.iOS Resource designer generator, inspired by [R.swift](https://github.com/mac-cain13/R.swift)
