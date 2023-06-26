@@ -18,7 +18,7 @@ jobs:
       with:
         nuget-api-key: ${{secrets.NUGET_API_KEY}}
     - name: Restore
-      run: nuget restore src/Xamarin.iOS.ResourceDesigner.sln
+      run: nuget restore src/Xamarin.iOS.ResourceDesigner.NuGet.sln
     - name: Build
       run: msbuild src/Xamarin.iOS.ResourceDesigner/Xamarin.iOS.ResourceDesigner.csproj /property:Configuration=Release /warnaserror
     - name: Publish
