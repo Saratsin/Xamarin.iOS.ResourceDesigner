@@ -34,127 +34,161 @@ namespace Xamarin.iOS.ResourceDesigner
 
         public string Parse(
             string projectNamespace,
-            string[] imageAssets,
-            string[] imageAssetsTrimmingPrefixes,
-            char[] imageAssetFilenamesSeparatorChars,
+            ImageAssetsRawDto imageAssets,
+            InterfaceDefinitionsRawDto interfaceDefinitions,
             string resourceDesignerFilePath)
         {
-            var assets = imageAssets
-                .Where(path => Path.GetFileName(path) == "Contents.json")
-                .Select(path => Directory.GetParent(path).FullName)
-                .Where(path => !string.IsNullOrEmpty(Path.GetExtension(path)))
-                .Where(path => Path.GetExtension(path).TrimStart('.') != "xcassets")
-                .GroupBy(assetPath => Path.GetExtension(assetPath).TrimStart('.'), assetPath => assetPath)
-                .Where(group => group.Any() && group.Key == "imageset");
-
             Log.LogMessage("Will start to build resources file");
-
-            var duplicates = new Dictionary<string, List<string>>();
-            var ambigiousPropertyNames = new Dictionary<string, List<string>>();
 
             var resourcesDto = new ResourcesDto
             {
                 Namespace = projectNamespace,
-                ClassesList = assets.Select(assetGroup =>
+                ImageClass = CreateImageClassDto(imageAssets, resourceDesignerFilePath),
+                NibClass = CreateNibClassDto(interfaceDefinitions, resourceDesignerFilePath),
+                ReuseIdentifierClass = CreateReuseIdentifierClassDto(interfaceDefinitions, resourceDesignerFilePath)
+            };
+
+            return StaticStubbleRenderer.Render(Template, resourcesDto);
+        }
+
+        private ClassDto? CreateImageClassDto(ImageAssetsRawDto imageAssets, string resourceDesignerFilePath)
+        {
+            // NOTE Filtering image asset paths only to those that we support
+            var imageAssetPaths = imageAssets.ImageAssetPaths
+                .Where(path => Path.GetFileName(path) == "Contents.json")
+                .Select(path => Directory.GetParent(path).FullName)
+                .Where(path => !string.IsNullOrEmpty(Path.GetExtension(path)))
+                .Where(path => Path.GetExtension(path).TrimStart('.') == "imageset")
+                .ToArray();
+
+            var classDto = CreateClassDto(
+                "Image",
+                imageAssetPaths,
+                imageAssets.TrimmingPrefixes,
+                imageAssets.FilenamesSeparatorChars,
+                resourceDesignerFilePath);
+
+            return classDto;
+        }
+
+
+        private ClassDto? CreateNibClassDto(InterfaceDefinitionsRawDto interfaceDefinitions, string resourceDesignerFilePath)
+        {
+            // NOTE Filtering xib paths only
+            var xibPaths = interfaceDefinitions.InterfaceDefinitionPaths
+                .Where(path => Path.GetExtension(path).TrimStart('.') == "xib")
+                .ToArray();
+
+            var classDto = CreateClassDto(
+                "Nib",
+                xibPaths,
+                Array.Empty<string>(),
+                Array.Empty<char>(),
+                resourceDesignerFilePath);
+
+            return classDto;
+        }
+
+        private ClassDto? CreateReuseIdentifierClassDto(InterfaceDefinitionsRawDto interfaceDefinitions, string resourceDesignerFilePath)
+        {
+            // NOTE Filtering xib paths only
+            var xibCellPaths = interfaceDefinitions.InterfaceDefinitionPaths
+                .Where(path => Path.GetExtension(path).TrimStart('.') == "xib")
+                .Where(path => Path.GetFileNameWithoutExtension(path).EndsWith("Cell"))
+                .ToArray();
+
+            var classDto = CreateClassDto(
+                "ReuseIdentifier",
+                xibCellPaths,
+                Array.Empty<string>(),
+                Array.Empty<char>(),
+                resourceDesignerFilePath);
+
+            return classDto;
+        }
+
+        private ClassDto? CreateClassDto(
+            string className,
+            string[] resourcePaths,
+            string[] trimmingPrefixes,
+            char[] filenamesSeparatorChars,
+            string resourceDesignerFilePath)
+        {
+            if (resourcePaths.Length == 0)
+            {
+                return null;
+            }
+
+            var duplicates = new Dictionary<string, List<string>>();
+            var ambigiousPropertyNames = new Dictionary<string, List<string>>();
+
+            var resourcesList = new List<ResourceItemDto>();
+
+            foreach (var resourcePath in resourcePaths)
+            {
+                var resourceName = Path.GetFileNameWithoutExtension(resourcePath);
+
+                // NOTE Checking for duplicate names of the resource
+                if (resourcesList.Any(field => field.ResourceId == resourceName))
                 {
-                    var className = GetClassName(assetGroup.Key);
-                    var itemType = GetItemType(className);
-                    var lazyFieldsList = new List<LazyFieldDto>();
-                    var propertiesList = new List<PropertyDto>();
-
-                    foreach (var assetPath in assetGroup)
+                    if (!duplicates.TryGetValue(resourceName, out var resourceDuplicates))
                     {
-                        var assetName = Path.GetFileNameWithoutExtension(assetPath);
-                        if (lazyFieldsList.Any(field => field.ResourceId == assetName))
+                        resourceDuplicates = new()
                         {
-                            if (!duplicates.TryGetValue(assetName, out var assetDuplicates))
-                            {
-                                duplicates[assetName] = new()
-                                {
-                                    lazyFieldsList.Single(field => field.ResourceId == assetName).ResourcePath!
-                                };
-                            }
+                            resourcesList.Single(field => field.ResourceId == resourceName).ResourcePath!
+                        };
 
-                            duplicates[assetName].Add(assetPath);
-
-                            continue;
-                        }
-
-                        var propertyName = GetPropertyName(assetName, imageAssetFilenamesSeparatorChars, imageAssetsTrimmingPrefixes);
-                        if (propertiesList.Any(property => property.PropertyName == propertyName))
-                        {
-                            if (!ambigiousPropertyNames.TryGetValue(propertyName, out var ambiguities))
-                            {
-                                ambigiousPropertyNames[propertyName] = new()
-                                {
-                                    propertiesList.Single(property => property.PropertyName == propertyName).ResourcePath!
-                                };
-                            }
-
-                            ambigiousPropertyNames[propertyName].Add(assetPath);
-
-                            var suffix = ambigiousPropertyNames[propertyName].Count - 1;
-                            propertyName = $"{propertyName}_{suffix}";
-                        }
-
-                        if (propertyName == className)
-                        {
-                            propertyName = $"{propertyName}Resource";
-                            Log.LogWarning(
-                                subcategory: null,
-                                warningCode: null,
-                                helpKeyword: null,
-                                file: resourceDesignerFilePath,
-                                lineNumber: 0,
-                                columnNumber: 0,
-                                endLineNumber: 0,
-                                endColumnNumber: 0,
-                                message: $"Asset {assetName} produces the same property name as its enclosing class.\nAdding suffix in order to avoid compilation error.\nPropery name will be {propertyName}");
-                        }
-
-                        var lazyFieldName = GetLazyFieldName(propertyName);
-                        var createItemAction = GetCreateItemAction(className, assetName);
-
-                        lazyFieldsList.Add(new()
-                        {
-                            ItemType = itemType,
-                            FieldName = lazyFieldName,
-                            CreateItemAction = createItemAction,
-                            ResourceId = assetName,
-                            ResourcePath = assetPath
-                        });
-
-                        propertiesList.Add(new()
-                        {
-                            ItemType = itemType,
-                            FieldName = lazyFieldName,
-                            PropertyName = propertyName,
-                            ResourcePath = assetPath
-                        }) ;
+                        duplicates.Add(resourceName, resourceDuplicates);
                     }
 
-                    return new ClassDto
+                    resourceDuplicates.Add(resourcePath);
+                    continue;
+                }
+
+                var propertyName = GetPropertyName(resourceName, filenamesSeparatorChars, trimmingPrefixes);
+
+                // NOTE Checking for duplicate property name
+                if (resourcesList.Any(property => property.PropertyName == propertyName))
+                {
+                    if (!ambigiousPropertyNames.TryGetValue(propertyName, out var ambiguities))
                     {
-                        ClassName = className,
-                        LazyFieldsList = lazyFieldsList,
-                        PropertiesList = propertiesList
-                    };
-                }).ToList()
-            };
+                        ambiguities = new()
+                        {
+                            resourcesList.Single(property => property.PropertyName == propertyName).ResourcePath!
+                        };
+
+                        ambigiousPropertyNames.Add(propertyName, ambiguities);
+                    }
+
+                    ambiguities.Add(resourcePath);
+
+                    var suffix = ambiguities.Count - 1;
+                    propertyName = $"{propertyName}_{suffix}";
+                }
+
+                // NOTE Checking if property has same name as a class
+                if (propertyName == className)
+                {
+                    propertyName = $"{propertyName}Resource";
+                    Log.LogWarningEx($"Asset {resourceName} produces the same property name as its enclosing class.\nAdding suffix in order to avoid compilation error.\nPropery name will be {propertyName}", resourceDesignerFilePath);
+                }
+
+                var lazyFieldName = GetLazyFieldName(propertyName);
+
+                resourcesList.Add(new()
+                {
+                    LazyFieldName = lazyFieldName,
+                    PropertyName = propertyName,
+                    ResourceId = resourceName,
+                    ResourcePath = resourcePath
+                });
+            }
+
 
             foreach (var duplicateList in duplicates)
             {
-                var assetsPathesString = string.Join("\n", duplicateList.Value);
-                Log.LogWarning(
-                    subcategory: null,
-                    warningCode: null,
-                    helpKeyword: null,
-                    file: resourceDesignerFilePath,
-                    lineNumber: 0,
-                    columnNumber: 0,
-                    endLineNumber: 0,
-                    endColumnNumber: 0,
-                    message: $"Asset {duplicateList.Key} has {duplicateList.Value.Count - 1} duplicates.\nHere is the full list with pathes to all identical assets:\n{assetsPathesString}");
+                var resourcePathesString = string.Join("\n", duplicateList.Value);
+                Log.LogWarningEx($"Resource {duplicateList.Key} has {duplicateList.Value.Count - 1} duplicates.\nHere is the full list with pathes to all identical resources:\n{resourcePathesString}", resourceDesignerFilePath);
             }
 
             foreach (var ambigiousPropertyNameList in ambigiousPropertyNames)
@@ -162,57 +196,21 @@ namespace Xamarin.iOS.ResourceDesigner
                 var propertyName = ambigiousPropertyNameList.Key;
                 var ambiguities = ambigiousPropertyNameList.Value;
                 var stringBuilder = new StringBuilder();
-                stringBuilder.AppendLine($"Property {propertyName} was ambigious and could be related to several assets.");
-                stringBuilder.AppendLine("Due to this fact, first asset was named as is, and the following amigious asset properties were appended with number suffix.");
-                stringBuilder.AppendLine("Here is the mapping table of the ambigious assets to their property names:");
-                stringBuilder.AppendLine($"{propertyName} => {Path.GetFileNameWithoutExtension(ambiguities[0])} ({ambiguities[0]})");
+                stringBuilder.AppendLine($"Property {propertyName} was ambigious and could be related to several resources.");
+                stringBuilder.AppendLine("Due to this fact, first resource was named as is, and the following amigious resource properties were appended with number suffix.");
+                stringBuilder.AppendLine("Here is the mapping table of the ambigious resources to their property names:");
+                stringBuilder.AppendLine($"{propertyName} => {Path.GetFileNameWithoutExtension(ambiguities[0])}\n{ambiguities[0]}");
                 for (var i = 1; i < ambiguities.Count; ++i)
                 {
-                    stringBuilder.AppendLine($"{propertyName}_{i} => {Path.GetFileNameWithoutExtension(ambiguities[i])} ({ambiguities[i]})");
+                    stringBuilder.AppendLine($"{propertyName}_{i} => {Path.GetFileNameWithoutExtension(ambiguities[i])}\n{ambiguities[i]}");
                 }
 
-                Log.LogWarning(
-                    subcategory: null,
-                    warningCode: null,
-                    helpKeyword: null,
-                    file: resourceDesignerFilePath,
-                    lineNumber: 0,
-                    columnNumber: 0,
-                    endLineNumber: 0,
-                    endColumnNumber: 0,
-                    message: stringBuilder.ToString());
+                Log.LogWarningEx(stringBuilder.ToString(), resourceDesignerFilePath);
             }
 
-            return StaticStubbleRenderer.Render(Template, resourcesDto);
+            var classDto = new ClassDto { ResourceItems = resourcesList };
+            return classDto;
         }
-        
-        private string GetClassName(string assetType)
-        {
-            return assetType switch
-            {
-                "imageset" => "Image",
-                _ => char.ToUpperInvariant(assetType[0]) + assetType.Substring(1)
-            };
-        }
-
-        private string GetItemType(string className)
-        {
-            return className switch
-            {
-                "Image" => "UIImage",
-                _ => throw new NotSupportedException($"Not supported class: {className}")
-            };
-        }
-
-        private string GetCreateItemAction(string className, string assetName)
-        {
-            return className switch
-            {
-                "Image" => $"() => UIImage.FromBundle(\"{assetName}\")",
-                _ => throw new NotSupportedException($"Not supported class: {className}")
-            };
-        }
-
 
         private string GetLazyFieldName(string propertyName)
         {

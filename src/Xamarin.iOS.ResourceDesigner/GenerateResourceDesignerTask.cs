@@ -2,6 +2,7 @@ using System.IO;
 using System.Linq;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
+using Xamarin.iOS.ResourceDesigner.Dto;
 
 namespace Xamarin.iOS.ResourceDesigner
 {
@@ -9,6 +10,9 @@ namespace Xamarin.iOS.ResourceDesigner
     {
         [Required]
         public ITaskItem[]? ImageAssets { get; set; }
+
+        [Required]
+        public ITaskItem[]? InterfaceDefinitions { get; set; }
 
         [Required]
         public string? ResourceDesignerFilePath { get; set; }
@@ -24,19 +28,26 @@ namespace Xamarin.iOS.ResourceDesigner
 
         public override bool Execute()
         {
-            var resourceDesignerFilename = Path.GetFileName(ResourceDesignerFilePath);
+            var resourceDesignerFilename = Path.GetFileName(ResourceDesignerFilePath!);
             Log.LogMessage($"Started {resourceDesignerFilename} creation :D");
 
-            var imageAssetFilePaths = ImageAssets!.Select(asset => asset.GetMetadata("FullPath")).ToArray();
-            var imageAssetsTrimmingPrefixes = ImageAssetsTrimmingPrefixes!.Split('|');
-            var imageAssetFilenamesSeparatorChars = ImageAssetFilenamesSeparatorChars!.ToCharArray();
+            var images = new ImageAssetsRawDto
+            {
+                ImageAssetPaths = ImageAssets!.Select(asset => asset.GetMetadata("FullPath")).ToArray(),
+                TrimmingPrefixes = ImageAssetsTrimmingPrefixes!.Split('|'),
+                FilenamesSeparatorChars = ImageAssetFilenamesSeparatorChars!.ToCharArray()
+            };
+
+            var interfaceDefinitions = new InterfaceDefinitionsRawDto
+            {
+                InterfaceDefinitionPaths = InterfaceDefinitions!.Select(interfaceDefinition => interfaceDefinition.GetMetadata("FullPath")).ToArray()
+            };
 
             var parser = new ResourceParser(Log);
             var resourceDesignerFileString = parser.Parse(
                 ProjectNamespace!,
-                imageAssetFilePaths,
-                imageAssetsTrimmingPrefixes,
-                imageAssetFilenamesSeparatorChars,
+                images,
+                interfaceDefinitions,
                 ResourceDesignerFilePath!);
 
             File.WriteAllText(ResourceDesignerFilePath!, resourceDesignerFileString);

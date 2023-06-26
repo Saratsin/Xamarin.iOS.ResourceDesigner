@@ -1,10 +1,10 @@
 ﻿namespace Xamarin.iOS.ResourceDesigner.Dto
 {
-    public record PropertyDto
+    public record ResourceItemDto
 	{
-		public string? ItemType { get; init; }
 		public string? PropertyName { get; init; }
-		public string? FieldName { get; init; }
+		public string? LazyFieldName { get; init; }
+		public string? ResourceId { get; init; }
 		public string? ResourcePath { get; init; }
 	}
 }

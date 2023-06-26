@@ -9,8 +9,8 @@
 
 using Foundation;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Reflection;
 using UIKit;
 
 namespace {{{Namespace}}}
@@ -19,18 +19,78 @@ namespace {{{Namespace}}}
     [Preserve(AllMembers = true)]
     public static partial class Resource
     {
-        {{#ClassesList}}
-        public static partial class {{{ClassName}}}
+        {{#ImageClass}}
+        public static partial class Image
         {
-            {{#LazyFieldsList}}
-            private static readonly Lazy<{{{ItemType}}}> {{{FieldName}}} = new Lazy<{{{ItemType}}}>({{{CreateItemAction}}});
-            {{/LazyFieldsList}}
-            {{#PropertiesList}}
+            private static readonly Dictionary<string, UIImage> _storage = new();
+            {{#ResourceItems}}
 
-            public static {{{ItemType}}} {{{PropertyName}}} => {{{FieldName}}}.Value;
-            {{/PropertiesList}}
+            public static UIImage {{{PropertyName}}} => GetImage("{{{ResourceId}}}");
+            {{/ResourceItems}}
+
+            private static UIImage GetImage(string key)
+            {
+                return GetResource<UIImage>(_storage, key, CreateImage);
+            }
+            
+            private static UIImage CreateImage(string assetName)
+            {
+                return UIImage.FromBundle(assetName);
+            }
         }
+        {{/ImageClass}}
 
-        {{/ClassesList}}
+        {{#NibClass}}
+        public static partial class Nib
+        {
+            private static readonly Dictionary<string, UINib> _storage = new();
+            {{#ResourceItems}}
+
+            public static UINib {{{PropertyName}}} => GetNib("{{{ResourceId}}}");
+            {{/ResourceItems}}
+
+            private static UINib GetNib(string key)
+            {
+                return GetResource<UINib>(_storage, key, CreateNib);
+            }
+
+            private static UINib CreateNib(string nibName)
+            {
+                return UINib.FromName(nibName, NSBundle.MainBundle);
+            }
+        }
+        {{/NibClass}}
+
+        {{#ReuseIdentifierClass}}
+        public static partial class ReuseIdentifier
+        {
+            private static readonly Dictionary<string, NSString> _storage = new();
+            {{#ResourceItems}}
+
+            public static NSString {{{PropertyName}}} => GetReuseIdentifier(nameof(Nib.{{{PropertyName}}}));
+            {{/ResourceItems}}
+
+            private static NSString GetReuseIdentifier(string nibName)
+            {
+                return GetResource<NSString>(_storage, nibName, CreateReuseIdentifier);
+            }
+
+            private static NSString CreateReuseIdentifier(string nibName)
+            {
+                return new NSString(nibName);
+            }
+        }
+        {{/ReuseIdentifierClass}}
+
+        private static T GetResource<T>(Dictionary<string, T> storage, string key, Func<string, T> createResourceFunc)
+        {
+             if (!storage.TryGetValue(key, out var resource))
+             {
+                resource = createResourceFunc.Invoke(key);
+                storage.Add(key, resource);
+             }
+
+             return resource;
+        }
     }
 }

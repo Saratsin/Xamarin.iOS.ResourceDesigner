@@ -16,6 +16,7 @@
 
 		<GenerateResourceDesignerTask
 			ImageAssets="@(ImageAsset)"
+			InterfaceDefinitions="@(InterfaceDefinition)"
 			ResourceDesignerFilePath="$(ResourceDesignerFilePath)"
 			ProjectNamespace="$(RootNamespace)"
 			ImageAssetsTrimmingPrefixes="$(ResourceDesignerImageAssetsTrimmingPrefixes)"

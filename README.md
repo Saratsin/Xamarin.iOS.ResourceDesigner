@@ -7,8 +7,8 @@ Xamarin.iOS Resource designer generator, inspired by [R.swift](https://github.co
 ## Description
 
 Resource generation tool for Xamarin.iOS projects. 
-Use code generation to get access to all of your Image Assets in the project.
-Get direct access to UIImage objects, without need for builerplate code.
+Use code generation to get access to all of your Image Assets and Xib files in the project.
+Get direct access to UIImage and UINib objects, without need for boilerplate code.
 Create only one instance: objects are created only if they're called, and each object is a singleton
 
 ## Getting Started
@@ -36,6 +36,10 @@ Pull requests are also most welcome.
 
 ## Version History
 
+* 0.8.0
+    * Added support of Nibs
+    * Added support of ReuseIdentifiers for cells
+    * Refactored Resource.designer.cs template: implemented _storage dictionaries instead of lazy fields
 * 0.7.0
     * Initial release, support for ImageAsset items that has Contents.json files
 
