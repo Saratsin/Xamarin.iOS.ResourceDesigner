@@ -6,6 +6,8 @@
 		<ResourceDesignerFilePath Condition="'$(ResourceDesignerFilePath)' == ''">$(IntermediateOutputPath)Resource.designer.cs</ResourceDesignerFilePath>
 		<ResourceDesignerImageAssetsTrimmingPrefixes  Condition="'$(ResourceDesignerImageAssetsTrimmingPrefixes)' == ''">ic|img</ResourceDesignerImageAssetsTrimmingPrefixes>
 		<ResourceDesignerImageAssetsFilenamesSeparatorChars Condition="'$(ResourceDesignerImageAssetsFilenamesSeparatorChars)' == ''"> _-+.</ResourceDesignerImageAssetsFilenamesSeparatorChars>
+		<ResourceDesignerColorAssetsTrimmingPrefixes  Condition="'$(ResourceDesignerColorAssetsTrimmingPrefixes)' == ''">c</ResourceDesignerColorAssetsTrimmingPrefixes>
+		<ResourceDesignerColorAssetsFilenamesSeparatorChars Condition="'$(ResourceDesignerColorAssetsFilenamesSeparatorChars)' == ''">_</ResourceDesignerColorAssetsFilenamesSeparatorChars>
 	</PropertyGroup>
 
 	<UsingTask TaskName="Xamarin.iOS.ResourceDesigner.GenerateResourceDesignerTask"
@@ -17,10 +19,13 @@
 		<GenerateResourceDesignerTask
 			ImageAssets="@(ImageAsset)"
 			InterfaceDefinitions="@(InterfaceDefinition)"
+			ColorAssets="@(ImageAsset)"
 			ResourceDesignerFilePath="$(ResourceDesignerFilePath)"
 			ProjectNamespace="$(RootNamespace)"
 			ImageAssetsTrimmingPrefixes="$(ResourceDesignerImageAssetsTrimmingPrefixes)"
-			ImageAssetFilenamesSeparatorChars="$(ResourceDesignerImageAssetsFilenamesSeparatorChars)" />
+			ImageAssetFilenamesSeparatorChars="$(ResourceDesignerImageAssetsFilenamesSeparatorChars)"
+			ColorAssetsTrimmingPrefixes="$(ResourceDesignerColorAssetsTrimmingPrefixes)"
+			ColorAssetFilenamesSeparatorCharts="$(ResourceDesignerColorAssetFilenamesSeparatorCharts)" />
 		<ItemGroup>
 			<FileWrites Include="$(ResourceDesignerFilePath)" />
 			<Compile Include="$(ResourceDesignerFilePath)" />

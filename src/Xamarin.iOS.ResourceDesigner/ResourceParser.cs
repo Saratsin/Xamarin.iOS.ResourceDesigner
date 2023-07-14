@@ -35,6 +35,7 @@ namespace Xamarin.iOS.ResourceDesigner
         public string Parse(
             string projectNamespace,
             ImageAssetsRawDto imageAssets,
+            ColorAssetRawDto colorAssets,
             InterfaceDefinitionsRawDto interfaceDefinitions,
             string resourceDesignerFilePath)
         {
@@ -44,6 +45,7 @@ namespace Xamarin.iOS.ResourceDesigner
             {
                 Namespace = projectNamespace,
                 ImageClass = CreateImageClassDto(imageAssets, resourceDesignerFilePath),
+                ColorClass = CreateColorClassDto(colorAssets, resourceDesignerFilePath),
                 NibClass = CreateNibClassDto(interfaceDefinitions, resourceDesignerFilePath),
                 ReuseIdentifierClass = CreateReuseIdentifierClassDto(interfaceDefinitions, resourceDesignerFilePath)
             };
@@ -66,6 +68,26 @@ namespace Xamarin.iOS.ResourceDesigner
                 imageAssetPaths,
                 imageAssets.TrimmingPrefixes,
                 imageAssets.FilenamesSeparatorChars,
+                resourceDesignerFilePath);
+
+            return classDto;
+        }
+        
+        private ClassDto? CreateColorClassDto(ColorAssetRawDto colorAssets, string resourceDesignerFilePath)
+        {
+            // NOTE Filtering image asset paths only to those that we support
+            var colorAssetPaths = colorAssets.ColorAssetPaths
+                .Where(path => Path.GetFileName(path) == "Contents.json")
+                .Select(path => Directory.GetParent(path).FullName)
+                .Where(path => !string.IsNullOrEmpty(Path.GetExtension(path)))
+                .Where(path => Path.GetExtension(path).TrimStart('.') == "colorset")
+                .ToArray();
+
+            var classDto = CreateClassDto(
+                "Color",
+                colorAssetPaths,
+                colorAssets.TrimmingPrefixes,
+                colorAssets.FilenamesSeparatorChars,
                 resourceDesignerFilePath);
 
             return classDto;

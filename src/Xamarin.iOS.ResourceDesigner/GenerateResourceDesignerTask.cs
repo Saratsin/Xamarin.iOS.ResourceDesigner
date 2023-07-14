@@ -10,6 +10,9 @@ namespace Xamarin.iOS.ResourceDesigner
     {
         [Required]
         public ITaskItem[]? ImageAssets { get; set; }
+        
+        [Required]
+        public ITaskItem[]? ColorAssets { get; set; }
 
         [Required]
         public ITaskItem[]? InterfaceDefinitions { get; set; }
@@ -19,9 +22,15 @@ namespace Xamarin.iOS.ResourceDesigner
 
         [Required]
         public string? ProjectNamespace { get; set; }
+        
+        [Required]
+        public string? ColorAssetsTrimmingPrefixes { get; set; }
 
         [Required]
         public string? ImageAssetsTrimmingPrefixes { get; set; }
+        
+        [Required]
+        public string? ColorAssetFilenamesSeparatorChars { get; set; }
 
         [Required]
         public string? ImageAssetFilenamesSeparatorChars { get; set; }
@@ -37,6 +46,13 @@ namespace Xamarin.iOS.ResourceDesigner
                 TrimmingPrefixes = ImageAssetsTrimmingPrefixes!.Split('|'),
                 FilenamesSeparatorChars = ImageAssetFilenamesSeparatorChars!.ToCharArray()
             };
+            
+            var colors = new ColorAssetRawDto
+            {
+                ColorAssetPaths = ColorAssets!.Select(asset => asset.GetMetadata("FullPath")).ToArray(),
+                TrimmingPrefixes = ColorAssetsTrimmingPrefixes!.Split('|'),
+                FilenamesSeparatorChars = ColorAssetFilenamesSeparatorChars!.ToCharArray()
+            };
 
             var interfaceDefinitions = new InterfaceDefinitionsRawDto
             {
@@ -47,6 +63,7 @@ namespace Xamarin.iOS.ResourceDesigner
             var resourceDesignerFileString = parser.Parse(
                 ProjectNamespace!,
                 images,
+                colors,
                 interfaceDefinitions,
                 ResourceDesignerFilePath!);
 
