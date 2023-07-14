@@ -1,4 +1,3 @@
-using System;
 using Microsoft.Build.Utilities;
 
 namespace Xamarin.iOS.ResourceDesigner
