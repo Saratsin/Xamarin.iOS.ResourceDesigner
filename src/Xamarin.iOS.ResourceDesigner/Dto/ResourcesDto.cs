@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace Xamarin.iOS.ResourceDesigner.Dto
+﻿namespace Xamarin.iOS.ResourceDesigner.Dto
 {
     public record ResourcesDto
 	{

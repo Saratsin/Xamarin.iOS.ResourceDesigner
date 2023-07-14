@@ -1,4 +1,3 @@
-using System;
 namespace Xamarin.iOS.ResourceDesigner.Dto
 {
     public record ImageAssetsRawDto

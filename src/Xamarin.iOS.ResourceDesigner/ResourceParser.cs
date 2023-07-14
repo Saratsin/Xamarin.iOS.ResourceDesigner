@@ -14,14 +14,14 @@ namespace Xamarin.iOS.ResourceDesigner
     {
         private const string MustacheTemplateResourceName = "Xamarin.iOS.ResourceDesigner.Resources.Resource.designer.mustache";
         
-        private readonly TaskLoggingHelper Log;
-        private readonly string Template;
+        private readonly TaskLoggingHelper _log;
+        private readonly string _template;
 
         public ResourceParser(TaskLoggingHelper log)
         {
-            Log = log;
+            _log = log;
 
-            Template = CreateTemplate();
+            _template = CreateTemplate();
         }
 
         private string CreateTemplate()
@@ -39,7 +39,7 @@ namespace Xamarin.iOS.ResourceDesigner
             InterfaceDefinitionsRawDto interfaceDefinitions,
             string resourceDesignerFilePath)
         {
-            Log.LogMessage("Will start to build resources file");
+            _log.LogMessage("Will start to build resources file");
 
             var resourcesDto = new ResourcesDto
             {
@@ -50,7 +50,7 @@ namespace Xamarin.iOS.ResourceDesigner
                 ReuseIdentifierClass = CreateReuseIdentifierClassDto(interfaceDefinitions, resourceDesignerFilePath)
             };
 
-            return StaticStubbleRenderer.Render(Template, resourcesDto);
+            return StaticStubbleRenderer.Render(_template, resourcesDto);
         }
 
         private ClassDto? CreateImageClassDto(ImageAssetsRawDto imageAssets, string resourceDesignerFilePath)
@@ -142,7 +142,7 @@ namespace Xamarin.iOS.ResourceDesigner
             }
 
             var duplicates = new Dictionary<string, List<string>>();
-            var ambigiousPropertyNames = new Dictionary<string, List<string>>();
+            var ambiguousPropertyNames = new Dictionary<string, List<string>>();
 
             var resourcesList = new List<ResourceItemDto>();
 
@@ -172,14 +172,14 @@ namespace Xamarin.iOS.ResourceDesigner
                 // NOTE Checking for duplicate property name
                 if (resourcesList.Any(property => property.PropertyName == propertyName))
                 {
-                    if (!ambigiousPropertyNames.TryGetValue(propertyName, out var ambiguities))
+                    if (!ambiguousPropertyNames.TryGetValue(propertyName, out var ambiguities))
                     {
                         ambiguities = new()
                         {
                             resourcesList.Single(property => property.PropertyName == propertyName).ResourcePath!
                         };
 
-                        ambigiousPropertyNames.Add(propertyName, ambiguities);
+                        ambiguousPropertyNames.Add(propertyName, ambiguities);
                     }
 
                     ambiguities.Add(resourcePath);
@@ -192,7 +192,7 @@ namespace Xamarin.iOS.ResourceDesigner
                 if (propertyName == className)
                 {
                     propertyName = $"{propertyName}Resource";
-                    Log.LogWarningEx($"Asset {resourceName} produces the same property name as its enclosing class.\nAdding suffix in order to avoid compilation error.\nPropery name will be {propertyName}", resourceDesignerFilePath);
+                    _log.LogWarningEx($"Asset {resourceName} produces the same property name as its enclosing class.\nAdding suffix in order to avoid compilation error.\nProperty name will be {propertyName}", resourceDesignerFilePath);
                 }
 
                 var lazyFieldName = GetLazyFieldName(propertyName);
@@ -209,25 +209,25 @@ namespace Xamarin.iOS.ResourceDesigner
 
             foreach (var duplicateList in duplicates)
             {
-                var resourcePathesString = string.Join("\n", duplicateList.Value);
-                Log.LogWarningEx($"Resource {duplicateList.Key} has {duplicateList.Value.Count - 1} duplicates.\nHere is the full list with pathes to all identical resources:\n{resourcePathesString}", resourceDesignerFilePath);
+                var resourcePathsString = string.Join("\n", duplicateList.Value);
+                _log.LogWarningEx($"Resource {duplicateList.Key} has {duplicateList.Value.Count - 1} duplicates.\nHere is the full list with paths to all identical resources:\n{resourcePathsString}", resourceDesignerFilePath);
             }
 
-            foreach (var ambigiousPropertyNameList in ambigiousPropertyNames)
+            foreach (var ambiguousPropertyNameList in ambiguousPropertyNames)
             {
-                var propertyName = ambigiousPropertyNameList.Key;
-                var ambiguities = ambigiousPropertyNameList.Value;
+                var propertyName = ambiguousPropertyNameList.Key;
+                var ambiguities = ambiguousPropertyNameList.Value;
                 var stringBuilder = new StringBuilder();
-                stringBuilder.AppendLine($"Property {propertyName} was ambigious and could be related to several resources.");
-                stringBuilder.AppendLine("Due to this fact, first resource was named as is, and the following amigious resource properties were appended with number suffix.");
-                stringBuilder.AppendLine("Here is the mapping table of the ambigious resources to their property names:");
+                stringBuilder.AppendLine($"Property {propertyName} was ambiguous and could be related to several resources.");
+                stringBuilder.AppendLine("Due to this fact, first resource was named as is, and the following ambiguous resource properties were appended with number suffix.");
+                stringBuilder.AppendLine("Here is the mapping table of the ambiguous resources to their property names:");
                 stringBuilder.AppendLine($"{propertyName} => {Path.GetFileNameWithoutExtension(ambiguities[0])}\n{ambiguities[0]}");
                 for (var i = 1; i < ambiguities.Count; ++i)
                 {
                     stringBuilder.AppendLine($"{propertyName}_{i} => {Path.GetFileNameWithoutExtension(ambiguities[i])}\n{ambiguities[i]}");
                 }
 
-                Log.LogWarningEx(stringBuilder.ToString(), resourceDesignerFilePath);
+                _log.LogWarningEx(stringBuilder.ToString(), resourceDesignerFilePath);
             }
 
             var classDto = new ClassDto { ResourceItems = resourcesList };
