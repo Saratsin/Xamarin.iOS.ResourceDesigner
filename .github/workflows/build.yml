@@ -39,7 +39,7 @@ jobs:
       shell: bash
       run: |
         packagePath=${{ steps.find_package_path.outputs.package_path }}
-        packageVersion=${packagePath##Xamarin.iOS.ResourceDesigner.}
+        packageVersion=${packagePath##*Xamarin.iOS.ResourceDesigner.}
         packageVersion=${packageVersion%.nupkg}
         packageVersionTag="v$packageVersion"
         echo "Pushing tag '$packageVersionTag'"
