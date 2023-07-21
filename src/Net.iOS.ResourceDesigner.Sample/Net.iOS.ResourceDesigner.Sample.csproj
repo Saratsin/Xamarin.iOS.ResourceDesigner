@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net7.0-ios</TargetFramework>
+    <OutputType>Exe</OutputType>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>true</ImplicitUsings>
+    <SupportedOSPlatformVersion>13.0</SupportedOSPlatformVersion>
+    <CreatePackage>false</CreatePackage>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Update="SimpleScreenView.designer.cs" DependentUpon="SimpleScreenView.cs" />
+    <Compile Update="SimpleTableViewCell.designer.cs" DependentUpon="SimpleTableViewCell.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Xamarin.iOS.ResourceDesigner" Version="0.8.1" />
+  </ItemGroup>
+</Project>
