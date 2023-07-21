@@ -6,7 +6,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
 
     steps:
     - name: Git Checkout
@@ -25,10 +25,10 @@ jobs:
       id: find_package_path
       run: |
         # Find the nupkg file with the required structure
-        packagePath=$(find src/Xamarin.iOS.ResourceDesigner/bin/Release -type f -name "Xamarin.iOS.ResourceDesigner.*.nupkg" | head -n 1)
-        echo "Found package on the path:"
-        echo "$packagePath"
-        echo "::set-output name=package_path::$packagePath"
+        $packagePath = Get-ChildItem -Path "src/Xamarin.iOS.ResourceDesigner/bin/Release" -Recurse -Filter "Xamarin.iOS.ResourceDesigner.*.nupkg" | Select-Object -First 1
+        Write-Host "Found package path:"
+        Write-Host "$packagePath"
+        Write-Output "::set-output name=package_path::$packagePath"
     - name: Publish
       uses: dansiegel/publish-nuget@v1.2
       with:
@@ -36,10 +36,13 @@ jobs:
         apiKey: ${{ secrets.NUGET_API_KEY }}
     - name: SetVersionTag
       run: |
-        packagePath=${{ steps.find_package_path.outputs.package_path }}
-        packageVersion=${packagePath##Xamarin.iOS.ResourceDesigner.}
-        packageVersion=${packageVersion%.nupkg}
+        $packagePath = ${{ steps.extract_version.outputs.package_path }}
+        $prefix = "Xamarin.iOS.ResourceDesigner."
+        $suffix = ".nupkg"
+        $startIndex = $packagePath.IndexOf($prefix) + $prefix.Length
+        $endIndex = $packagePath.IndexOf($suffix, $startIndex)
+        $packageVersion = $packagePath.Substring($startIndex, $endIndex - $startIndex)
         packageVersionTag="v$packageVersion"
-        echo "Pushing tag '$packageVersionTag'"
+        Write-Host "Pushing tag '$packageVersionTag'"
         git tag "$packageVersionTag"
         git push --tags
