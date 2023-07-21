@@ -42,7 +42,7 @@ Pull requests are also most welcome.
 
 * 0.8.1
     * Added support for projects with `net6.0-ios` and `net7.0-ios` target frameworks (also added sample project with `net7.0-ios` target framework)
-    * Added support of Color Sets that have Contents.json files (many thanks to @aliyailina for this implementation and pull request)
+    * Added support of Color Sets that have Contents.json files (many thanks to [@aliyailina](https://github.com/aliyailina) for this implementation and pull request)
 * 0.8.0
     * Added support of Nibs
     * Added support of ReuseIdentifiers for cells
