@@ -80,7 +80,7 @@
     </ItemGroup>
     <ItemGroup>
       <PackageReference Include="Xamarin.Essentials" Version="1.7.5" />
-      <PackageReference Include="Xamarin.iOS.ResourceDesigner" Version="0.8.0" />
+      <PackageReference Include="Xamarin.iOS.ResourceDesigner" Version="0.8.1" />
     </ItemGroup>
     <ItemGroup>
         <ImageAsset Include="Assets.xcassets\AppIcon.appiconset\Contents.json">
@@ -130,7 +130,7 @@
         <ImageAsset Include="Assets.xcassets\ic_info_personal.imageset\Contents.json" />
         <ImageAsset Include="Assets.xcassets\ic_list.imageset\ic_list.pdf" />
         <ImageAsset Include="Assets.xcassets\ic_list.imageset\Contents.json" />
-        <ImageAsset Include="Assets.xcassets\sample_color.colorset\Contents.json"/>
+        <ImageAsset Include="Assets.xcassets\sample_color.colorset\Contents.json" />
         <ImageAsset Include="Media.xcassets\Contents.json" />
         <ImageAsset Include="Media.xcassets\Assets\Contents.json" />
         <ImageAsset Include="Media.xcassets\Assets\ic_info_personal.imageset\ic_info.pdf" />
