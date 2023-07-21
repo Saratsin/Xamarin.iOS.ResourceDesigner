@@ -9,7 +9,7 @@ namespace Xamarin.iOS.ResourceDesigner
     public class GenerateResourceDesignerTask : Task
     {
         [Required]
-        public ITaskItem[]? ImageAssets { get; set; }
+        public ITaskItem[]? Assets { get; set; }
 
         [Required]
         public ITaskItem[]? InterfaceDefinitions { get; set; }
@@ -19,23 +19,44 @@ namespace Xamarin.iOS.ResourceDesigner
 
         [Required]
         public string? ProjectNamespace { get; set; }
+        
+        [Required]
+        public string? ColorSetsTrimmingPrefixes { get; set; }
 
         [Required]
-        public string? ImageAssetsTrimmingPrefixes { get; set; }
+        public string? ImageSetsTrimmingPrefixes { get; set; }
+        
+        [Required]
+        public string? ColorSetsFilenamesSeparatorChars { get; set; }
 
         [Required]
-        public string? ImageAssetFilenamesSeparatorChars { get; set; }
+        public string? ImageSetsFilenamesSeparatorChars { get; set; }
 
         public override bool Execute()
         {
             var resourceDesignerFilename = Path.GetFileName(ResourceDesignerFilePath!);
             Log.LogMessage($"Started {resourceDesignerFilename} creation :D");
-
-            var images = new ImageAssetsRawDto
+            
+            // NOTE Filtering asset paths only to those that we support
+            var assetPaths = Assets!
+                .Select(a => a.GetMetadata("FullPath"))
+                .Where(p => Path.GetFileName(p) == "Contents.json")
+                .Select(p => Directory.GetParent(p)!.FullName)
+                .Where(path => !string.IsNullOrEmpty(Path.GetExtension(path)))
+                .ToLookup(Path.GetExtension);
+            
+            var images = new ImageSetsRawDto
             {
-                ImageAssetPaths = ImageAssets!.Select(asset => asset.GetMetadata("FullPath")).ToArray(),
-                TrimmingPrefixes = ImageAssetsTrimmingPrefixes!.Split('|'),
-                FilenamesSeparatorChars = ImageAssetFilenamesSeparatorChars!.ToCharArray()
+                ImageSetPaths = assetPaths[".imageset"].ToArray(),
+                TrimmingPrefixes = ImageSetsTrimmingPrefixes!.Split('|'),
+                FilenamesSeparatorChars = ImageSetsFilenamesSeparatorChars!.ToCharArray()
+            };
+            
+            var colors = new ColorSetsRawDto
+            {
+                ColorSetPaths = assetPaths[".colorset"].ToArray(),
+                TrimmingPrefixes = ColorSetsTrimmingPrefixes!.Split('|'),
+                FilenamesSeparatorChars = ColorSetsFilenamesSeparatorChars!.ToCharArray()
             };
 
             var interfaceDefinitions = new InterfaceDefinitionsRawDto
@@ -47,6 +68,7 @@ namespace Xamarin.iOS.ResourceDesigner
             var resourceDesignerFileString = parser.Parse(
                 ProjectNamespace!,
                 images,
+                colors,
                 interfaceDefinitions,
                 ResourceDesignerFilePath!);
 

@@ -4,23 +4,27 @@
 	<!--NOTE: declare these properties here instead of props file, since $(IntermediateOuputPath) is not defined at the moment when props file is executed-->
 	<PropertyGroup>
 		<ResourceDesignerFilePath Condition="'$(ResourceDesignerFilePath)' == ''">$(IntermediateOutputPath)Resource.designer.cs</ResourceDesignerFilePath>
-		<ResourceDesignerImageAssetsTrimmingPrefixes  Condition="'$(ResourceDesignerImageAssetsTrimmingPrefixes)' == ''">ic|img</ResourceDesignerImageAssetsTrimmingPrefixes>
-		<ResourceDesignerImageAssetsFilenamesSeparatorChars Condition="'$(ResourceDesignerImageAssetsFilenamesSeparatorChars)' == ''"> _-+.</ResourceDesignerImageAssetsFilenamesSeparatorChars>
+		<ResourceDesignerImageSetsTrimmingPrefixes  Condition="'$(ResourceDesignerImageSetsTrimmingPrefixes)' == ''">ic|img</ResourceDesignerImageSetsTrimmingPrefixes>
+		<ResourceDesignerImageSetsFilenamesSeparatorChars Condition="'$(ResourceDesignerImageSetsFilenamesSeparatorChars)' == ''"> _-+.</ResourceDesignerImageSetsFilenamesSeparatorChars>
+		<ResourceDesignerColorSetsTrimmingPrefixes  Condition="'$(ResourceDesignerColorSetsTrimmingPrefixes)' == ''">c</ResourceDesignerColorSetsTrimmingPrefixes>
+		<ResourceDesignerColorSetsFilenamesSeparatorChars Condition="'$(ResourceDesignerColorSetsFilenamesSeparatorChars)' == ''"> _-+</ResourceDesignerColorSetsFilenamesSeparatorChars>
 	</PropertyGroup>
 
 	<UsingTask TaskName="Xamarin.iOS.ResourceDesigner.GenerateResourceDesignerTask"
 		AssemblyFile="..\tasks\netstandard2.0\Xamarin.iOS.ResourceDesigner.dll" />
 	<Target Name="GenerateResourceDesigner" BeforeTargets="CoreCompile">
-		<Error Condition="'$(TargetFrameworkIdentifier)' != 'Xamarin.iOS'"
-			Text="This NuGet package is compatible only with Xamarin.iOS projects" />
+		<Error Condition="'$(TargetFrameworkIdentifier)' != 'Xamarin.iOS' And '$(TargetFramework)' != 'xamarinios10' And '$(TargetFramework)' != 'net6.0-ios' And '$(TargetFramework)' != 'net7.0-ios'"
+			Text="Incompatible project. Your project should match one of the following criteria in order to be compatible with Xamarin.iOS.ResourceDesigner package:&#xA; - TargetFrameworkIdentifier property is 'Xamarin.iOS'&#xA; - TargetFramework property is 'xamarinios10'&#xA; - TargetFramework property is 'net6.0-ios'&#xA; - TargetFramework property is 'net7.0-ios'&#xA;This project instead has the following properties:&#xA; - TargetFrameworkIdentifier property is '$(TargetFrameworkIdentifier)'&#xA; - TargetFramework property is '$(TargetFramework)'" />
 
 		<GenerateResourceDesignerTask
-			ImageAssets="@(ImageAsset)"
+			Assets="@(ImageAsset)"
 			InterfaceDefinitions="@(InterfaceDefinition)"
 			ResourceDesignerFilePath="$(ResourceDesignerFilePath)"
 			ProjectNamespace="$(RootNamespace)"
-			ImageAssetsTrimmingPrefixes="$(ResourceDesignerImageAssetsTrimmingPrefixes)"
-			ImageAssetFilenamesSeparatorChars="$(ResourceDesignerImageAssetsFilenamesSeparatorChars)" />
+			ImageSetsTrimmingPrefixes="$(ResourceDesignerImageSetsTrimmingPrefixes)"
+			ImageSetsFilenamesSeparatorChars="$(ResourceDesignerImageSetsFilenamesSeparatorChars)"
+			ColorSetsTrimmingPrefixes="$(ResourceDesignerColorSetsTrimmingPrefixes)"
+			ColorSetsFilenamesSeparatorChars="$(ResourceDesignerColorSetsFilenamesSeparatorChars)" />
 		<ItemGroup>
 			<FileWrites Include="$(ResourceDesignerFilePath)" />
 			<Compile Include="$(ResourceDesignerFilePath)" />

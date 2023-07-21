@@ -7,8 +7,8 @@ Xamarin.iOS Resource designer generator, inspired by [R.swift](https://github.co
 ## Description
 
 Resource generation tool for Xamarin.iOS projects. 
-Use code generation to get access to all of your Image Assets and Xib files in the project.
-Get direct access to UIImage and UINib objects, without need for boilerplate code.
+Use code generation to get access to all of your Assets and Xib files in the project.
+Get direct access to UIImage, UIColor and UINib objects, without need for boilerplate code.
 Create only one instance: objects are created only if they're called, and each object is a singleton
 
 ## Getting Started
@@ -24,9 +24,13 @@ There are several things you can customize to the code generation with special p
 * `<ResourceDesignerFilePath>` - defines the location of the Resource Designer file. 
   The default value is `"obj\$(Configuration)\$(Platform)\Resource.designer.cs"`. 
   This path is relative to the location of the csproj file.
-* `<ResourceDesignerImageAssetsTrimmingPrefixes>` - defines the list of prefixes, divided by pipe symbol (|), that will be trimmed for the names of the image asset properties.
+* `<ResourceDesignerImageSetsTrimmingPrefixes>` - defines the list of prefixes, divided by pipe symbol (|), that will be trimmed for the names of the image set properties.
   The default value is `"ic|img"`
-* `<ResourceDesignerImageAssetsFilenamesSeparatorChars>` - defines symbols that separate words in the name of file, all characters written consequently in string. 
+* `<ResourceDesignerImageSetsFilenamesSeparatorChars>` - defines symbols that separate words in the name of image set file, all characters written consequently in string. 
+  This property is important for the name parsing of properties. The default value is `" _-+."`
+* `<ResourceDesignerColorSetsTrimmingPrefixes>` - defines the list of prefixes, divided by pipe symbol (|), that will be trimmed for the names of the color set properties.
+    The default value is `"ic|img"`
+* `<ResourceDesignerColorSetsFilenamesSeparatorChars>` - defines symbols that separate words in the name of color set file, all characters written consequently in string.
   This property is important for the name parsing of properties. The default value is `" _-+."`
 
 ## Issues and Features
@@ -36,12 +40,15 @@ Pull requests are also most welcome.
 
 ## Version History
 
+* 0.8.1
+    * Added support for projects with `net6.0-ios` and `net7.0-ios` target frameworks (also added sample project with `net7.0-ios` target framework)
+    * Added support of Color Sets that have Contents.json files (many thanks to [@aliyailina](https://github.com/aliyailina) for this implementation and pull request)
 * 0.8.0
     * Added support of Nibs
     * Added support of ReuseIdentifiers for cells
     * Refactored Resource.designer.cs template: implemented _storage dictionaries instead of lazy fields
 * 0.7.0
-    * Initial release, support for ImageAsset items that has Contents.json files
+    * Initial release, support for Image Sets that have Contents.json files
 
 ## License
 

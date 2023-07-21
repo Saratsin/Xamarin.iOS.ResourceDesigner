@@ -21,8 +21,25 @@ jobs:
       run: nuget restore src/Xamarin.iOS.ResourceDesigner.NuGet.sln
     - name: Build
       run: msbuild src/Xamarin.iOS.ResourceDesigner/Xamarin.iOS.ResourceDesigner.csproj /property:Configuration=Release /warnaserror
+    - name: Find package path
+      id: find_package_path
+      run: |
+        # Find the nupkg file with the required structure
+        packagePath=$(find src/Xamarin.iOS.ResourceDesigner/bin/Release -type f -name "Xamarin.iOS.ResourceDesigner.*.nupkg" | head -n 1)
+        echo "Found package on the path:"
+        echo "$packagePath"
+        echo "::set-output name=package_path::$packagePath"
     - name: Publish
       uses: dansiegel/publish-nuget@v1.2
       with:
-        filename: 'src/Xamarin.iOS.ResourceDesigner/bin/Release/Xamarin.iOS.ResourceDesigner.*.nupkg'
+        filename: ${{ steps.find_package_path.outputs.package_path }}
         apiKey: ${{ secrets.NUGET_API_KEY }}
+    - name: SetVersionTag
+      run: |
+        packagePath=${{ steps.find_package_path.outputs.package_path }}
+        packageVersion=${packagePath##Xamarin.iOS.ResourceDesigner.}
+        packageVersion=${packageVersion%.nupkg}
+        packageVersionTag="v$packageVersion"
+        echo "Pushing tag '$packageVersionTag'"
+        git tag "$packageVersionTag"
+        git push --tags

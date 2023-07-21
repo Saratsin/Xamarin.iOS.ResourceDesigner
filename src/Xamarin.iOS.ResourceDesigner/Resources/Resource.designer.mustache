@@ -40,6 +40,27 @@ namespace {{{Namespace}}}
         }
         {{/ImageClass}}
 
+        {{#ColorClass}}
+        public static partial class Color
+        {
+            private static readonly Dictionary<string, UIColor> _storage = new();
+            {{#ResourceItems}}
+
+            public static UIColor {{{PropertyName}}} => GetColor("{{{ResourceId}}}");
+            {{/ResourceItems}}
+
+            private static UIColor GetColor(string key)
+            {
+                return GetResource<UIColor>(_storage, key, CreateColor);
+            }
+
+            private static UIColor CreateColor(string assetName)
+            {
+                return UIColor.FromName(assetName);
+            }
+        }
+        {{/ColorClass}}
+
         {{#NibClass}}
         public static partial class Nib
         {
