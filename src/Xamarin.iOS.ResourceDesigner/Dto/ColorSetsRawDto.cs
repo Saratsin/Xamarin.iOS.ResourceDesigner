@@ -1,8 +1,8 @@
 namespace Xamarin.iOS.ResourceDesigner.Dto
 {
-    public record ColorAssetRawDto
+    public record ColorSetsRawDto
     {
-        public string[] ColorAssetPaths { get; init; } = { };
+        public string[] ColorSetPaths { get; init; } = { };
         public string[] TrimmingPrefixes { get; init; } = { };
         public char[] FilenamesSeparatorChars { get; init; } = { };
     }

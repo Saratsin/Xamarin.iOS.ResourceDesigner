@@ -1,8 +1,8 @@
 namespace Xamarin.iOS.ResourceDesigner.Dto
 {
-    public record ImageAssetsRawDto
+    public record ImageSetsRawDto
     {
-        public string[] ImageAssetPaths { get; init; } = { };
+        public string[] ImageSetPaths { get; init; } = { };
         public string[] TrimmingPrefixes { get; init; } = { };
         public char[] FilenamesSeparatorChars { get; init; } = { };
     }

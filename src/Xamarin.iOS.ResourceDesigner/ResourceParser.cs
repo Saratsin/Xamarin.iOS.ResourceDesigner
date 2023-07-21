@@ -34,8 +34,8 @@ namespace Xamarin.iOS.ResourceDesigner
 
         public string Parse(
             string projectNamespace,
-            ImageAssetsRawDto imageAssets,
-            ColorAssetRawDto colorAssets,
+            ImageSetsRawDto imageSets,
+            ColorSetsRawDto colorSets,
             InterfaceDefinitionsRawDto interfaceDefinitions,
             string resourceDesignerFilePath)
         {
@@ -44,8 +44,8 @@ namespace Xamarin.iOS.ResourceDesigner
             var resourcesDto = new ResourcesDto
             {
                 Namespace = projectNamespace,
-                ImageClass = CreateImageClassDto(imageAssets, resourceDesignerFilePath),
-                ColorClass = CreateColorClassDto(colorAssets, resourceDesignerFilePath),
+                ImageClass = CreateImageClassDto(imageSets, resourceDesignerFilePath),
+                ColorClass = CreateColorClassDto(colorSets, resourceDesignerFilePath),
                 NibClass = CreateNibClassDto(interfaceDefinitions, resourceDesignerFilePath),
                 ReuseIdentifierClass = CreateReuseIdentifierClassDto(interfaceDefinitions, resourceDesignerFilePath)
             };
@@ -53,41 +53,26 @@ namespace Xamarin.iOS.ResourceDesigner
             return StaticStubbleRenderer.Render(_template, resourcesDto);
         }
 
-        private ClassDto? CreateImageClassDto(ImageAssetsRawDto imageAssets, string resourceDesignerFilePath)
+        private ClassDto? CreateImageClassDto(ImageSetsRawDto imageSets, string resourceDesignerFilePath)
         {
-            // NOTE Filtering image asset paths only to those that we support
-            var imageAssetPaths = imageAssets.ImageAssetPaths
-                .Where(path => Path.GetFileName(path) == "Contents.json")
-                .Select(path => Directory.GetParent(path).FullName)
-                .Where(path => !string.IsNullOrEmpty(Path.GetExtension(path)))
-                .Where(path => Path.GetExtension(path).TrimStart('.') == "imageset")
-                .ToArray();
-
             var classDto = CreateClassDto(
                 "Image",
-                imageAssetPaths,
-                imageAssets.TrimmingPrefixes,
-                imageAssets.FilenamesSeparatorChars,
+                imageSets.ImageSetPaths,
+                imageSets.TrimmingPrefixes,
+                imageSets.FilenamesSeparatorChars,
                 resourceDesignerFilePath);
 
             return classDto;
         }
         
-        private ClassDto? CreateColorClassDto(ColorAssetRawDto colorAssets, string resourceDesignerFilePath)
+        private ClassDto? CreateColorClassDto(ColorSetsRawDto colorSets, string resourceDesignerFilePath)
         {
             // NOTE Filtering image asset paths only to those that we support
-            var colorAssetPaths = colorAssets.ColorAssetPaths
-                .Where(path => Path.GetFileName(path) == "Contents.json")
-                .Select(path => Directory.GetParent(path).FullName)
-                .Where(path => !string.IsNullOrEmpty(Path.GetExtension(path)))
-                .Where(path => Path.GetExtension(path).TrimStart('.') == "colorset")
-                .ToArray();
-
             var classDto = CreateClassDto(
                 "Color",
-                colorAssetPaths,
-                colorAssets.TrimmingPrefixes,
-                colorAssets.FilenamesSeparatorChars,
+                colorSets.ColorSetPaths,
+                colorSets.TrimmingPrefixes,
+                colorSets.FilenamesSeparatorChars,
                 resourceDesignerFilePath);
 
             return classDto;
