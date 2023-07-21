@@ -21,25 +21,30 @@ jobs:
       run: nuget restore src/Xamarin.iOS.ResourceDesigner.NuGet.sln
     - name: Build
       run: msbuild src/Xamarin.iOS.ResourceDesigner/Xamarin.iOS.ResourceDesigner.csproj /property:Configuration=Release /warnaserror
-    - name: Find package path
-      id: find_package_path
+    - name: Find paths
+      id: find_paths
       shell: bash
       run: |
         # Find the nupkg file with the required structure
         packagePath=$(find src/Xamarin.iOS.ResourceDesigner/bin/Release -type f -name "Xamarin.iOS.ResourceDesigner.*.nupkg" | head -n 1)
         echo "Found package on the path:"
         echo "$packagePath"
+        symbolsPath=$(find src/Xamarin.iOS.ResourceDesigner/bin/Release -type f -name "Xamarin.iOS.ResourceDesigner.*.snupkg" | head -n 1)
+        echo "Found symbols on the path:"
+        echo "$symbolsPath"
         echo "package_path=$packagePath" >> $GITHUB_OUTPUT
+        echo "symbols_path=$symbolsPath" >> $GITHUB_OUTPUT
     - name: Publish
-      uses: dansiegel/publish-nuget@v1.2
+      uses: edumserrano/nuget-push@v1.2.2
       with:
-        filename: ${{ steps.find_package_path.outputs.package_path }}
-        apiKey: ${{ secrets.NUGET_API_KEY }}
+        api-key: ${{ secrets.NUGET_API_KEY }}
+        nuget-package: ${{ steps.find_paths.outputs.package_path }}
+        symbols-package: ${{ steps.find_paths.outputs.symbols_path }}
     - name: SetVersionTag
       shell: bash
       run: |
-        packagePath=${{ steps.find_package_path.outputs.package_path }}
-        packageVersion=${packagePath##Xamarin.iOS.ResourceDesigner.}
+        packagePath=${{ steps.find_paths.outputs.package_path }}
+        packageVersion=${packagePath##*Xamarin.iOS.ResourceDesigner.}
         packageVersion=${packageVersion%.nupkg}
         packageVersionTag="v$packageVersion"
         echo "Pushing tag '$packageVersionTag'"
