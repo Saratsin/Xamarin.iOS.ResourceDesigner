@@ -4,8 +4,10 @@
 	<!--NOTE: declare these properties here instead of props file, since $(IntermediateOuputPath) is not defined at the moment when props file is executed-->
 	<PropertyGroup>
 		<ResourceDesignerFilePath Condition="'$(ResourceDesignerFilePath)' == ''">$(IntermediateOutputPath)Resource.designer.cs</ResourceDesignerFilePath>
-		<ResourceDesignerImageAssetsTrimmingPrefixes  Condition="'$(ResourceDesignerImageAssetsTrimmingPrefixes)' == ''">ic|img</ResourceDesignerImageAssetsTrimmingPrefixes>
-		<ResourceDesignerImageAssetsFilenamesSeparatorChars Condition="'$(ResourceDesignerImageAssetsFilenamesSeparatorChars)' == ''"> _-+.</ResourceDesignerImageAssetsFilenamesSeparatorChars>
+		<ResourceDesignerImageSetsTrimmingPrefixes  Condition="'$(ResourceDesignerImageSetsTrimmingPrefixes)' == ''">ic|img</ResourceDesignerImageSetsTrimmingPrefixes>
+		<ResourceDesignerImageSetsFilenamesSeparatorChars Condition="'$(ResourceDesignerImageSetsFilenamesSeparatorChars)' == ''"> _-+.</ResourceDesignerImageSetsFilenamesSeparatorChars>
+		<ResourceDesignerColorSetsTrimmingPrefixes  Condition="'$(ResourceDesignerColorSetsTrimmingPrefixes)' == ''">c</ResourceDesignerColorSetsTrimmingPrefixes>
+		<ResourceDesignerColorSetsFilenamesSeparatorChars Condition="'$(ResourceDesignerColorSetsFilenamesSeparatorChars)' == ''"> _-+</ResourceDesignerColorSetsFilenamesSeparatorChars>
 	</PropertyGroup>
 
 	<UsingTask TaskName="Xamarin.iOS.ResourceDesigner.GenerateResourceDesignerTask"
@@ -15,12 +17,14 @@
 			Text="This NuGet package is compatible only with Xamarin.iOS projects" />
 
 		<GenerateResourceDesignerTask
-			ImageAssets="@(ImageAsset)"
+			Assets="@(ImageAsset)"
 			InterfaceDefinitions="@(InterfaceDefinition)"
 			ResourceDesignerFilePath="$(ResourceDesignerFilePath)"
 			ProjectNamespace="$(RootNamespace)"
-			ImageAssetsTrimmingPrefixes="$(ResourceDesignerImageAssetsTrimmingPrefixes)"
-			ImageAssetFilenamesSeparatorChars="$(ResourceDesignerImageAssetsFilenamesSeparatorChars)" />
+			ImageSetsTrimmingPrefixes="$(ResourceDesignerImageSetsTrimmingPrefixes)"
+			ImageSetsFilenamesSeparatorChars="$(ResourceDesignerImageSetsFilenamesSeparatorChars)"
+			ColorSetsTrimmingPrefixes="$(ResourceDesignerColorSetsTrimmingPrefixes)"
+			ColorSetsFilenamesSeparatorChars="$(ResourceDesignerColorSetsFilenamesSeparatorChars)" />
 		<ItemGroup>
 			<FileWrites Include="$(ResourceDesignerFilePath)" />
 			<Compile Include="$(ResourceDesignerFilePath)" />
