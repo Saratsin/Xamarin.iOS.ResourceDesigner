@@ -80,7 +80,7 @@
     </ItemGroup>
     <ItemGroup>
       <PackageReference Include="Xamarin.Essentials" Version="1.7.5" />
-      <PackageReference Include="Xamarin.iOS.ResourceDesigner" Version="0.8.2" />
+      <PackageReference Include="Xamarin.iOS.ResourceDesigner" Version="0.8.3" />
     </ItemGroup>
     <ItemGroup>
         <ImageAsset Include="Assets.xcassets\AppIcon.appiconset\Contents.json">

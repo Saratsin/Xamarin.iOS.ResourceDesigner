@@ -40,6 +40,8 @@ Pull requests are also most welcome.
 
 ## Version History
 
+* 0.8.3
+    * Added support for projects with any .NET framework version as long as its platform identifier is `ios`;
 * 0.8.1
     * Added support for projects with `net6.0-ios` and `net7.0-ios` target frameworks (also added sample project with `net7.0-ios` target framework)
     * Added support of Color Sets that have Contents.json files (many thanks to [@aliyailina](https://github.com/aliyailina) for this implementation and pull request)

@@ -12,6 +12,6 @@
     <Compile Update="SimpleTableViewCell.designer.cs" DependentUpon="SimpleTableViewCell.cs" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Xamarin.iOS.ResourceDesigner" Version="0.8.2" />
+    <PackageReference Include="Xamarin.iOS.ResourceDesigner" Version="0.8.3" />
   </ItemGroup>
 </Project>
