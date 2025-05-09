@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net7.0-ios</TargetFramework>
+    <TargetFramework>net8.0-ios</TargetFramework>
     <OutputType>Exe</OutputType>
     <Nullable>enable</Nullable>
     <ImplicitUsings>true</ImplicitUsings>
@@ -12,6 +12,6 @@
     <Compile Update="SimpleTableViewCell.designer.cs" DependentUpon="SimpleTableViewCell.cs" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Xamarin.iOS.ResourceDesigner" Version="0.8.1" />
+    <PackageReference Include="Xamarin.iOS.ResourceDesigner" Version="0.8.2" />
   </ItemGroup>
 </Project>
